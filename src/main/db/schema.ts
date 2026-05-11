@@ -47,6 +47,41 @@ export const products = sqliteTable('products', {
   updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 
+export const customers = sqliteTable('customers', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  phone: text('phone'),
+  email: text('email'),
+  address: text('address'),
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+})
+
+export const sales = sqliteTable('sales', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  customerId: integer('customer_id').references(() => customers.id),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  total: integer('total').notNull(),
+  paymentMethod: text('payment_method', { enum: ['cash', 'card', 'transfer'] }).notNull(),
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+})
+
+export const saleItems = sqliteTable('sale_items', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  saleId: integer('sale_id')
+    .notNull()
+    .references(() => sales.id),
+  productId: integer('product_id')
+    .notNull()
+    .references(() => products.id),
+  quantity: integer('quantity').notNull(),
+  unitPrice: integer('unit_price').notNull(),
+  discountPercent: integer('discount_percent').notNull().default(0),
+  subtotal: integer('subtotal').notNull(),
+})
+
 export const stockMovements = sqliteTable('stock_movements', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   productId: integer('product_id')
@@ -78,3 +113,4 @@ export type UserRow = typeof users.$inferSelect
 export type CategoryRow = typeof categories.$inferSelect
 export type SupplierRow = typeof suppliers.$inferSelect
 export type ProductRow = typeof products.$inferSelect
+export type CustomerRow = typeof customers.$inferSelect

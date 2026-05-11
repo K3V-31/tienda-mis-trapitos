@@ -1,5 +1,7 @@
 export type UserRole = 'admin' | 'vendor' | 'stock'
 
+export type PaymentMethod = 'cash' | 'card' | 'transfer'
+
 export type SessionUser = {
   id: number
   username: string
@@ -130,4 +132,43 @@ export type UpdateProductInput = {
 export type SetProductActiveInput = {
   id: number
   active: boolean
+}
+
+export type Customer = {
+  id: number
+  name: string
+  phone: string | null
+  email: string | null
+  address: string | null
+  purchasesCount: number
+  lastPurchaseAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export type CustomerFilters = {
+  search?: string
+}
+
+export type CreateCustomerInput = {
+  name: string
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+}
+
+export type UpdateCustomerInput = {
+  id: number
+  name: string
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+}
+
+export type CustomerSaleSummary = {
+  saleId: number
+  totalInCents: number
+  paymentMethod: PaymentMethod
+  itemCount: number
+  createdAt: string
 }

@@ -15,6 +15,7 @@ const navByRole: Record<UserRole, NavItem[]> = {
     { to: '/suppliers', label: 'Proveedores', description: 'Relación con abastecimiento' },
     { to: '/inventory', label: 'Inventario', description: 'Entradas y ajustes' },
     { to: '/offers', label: 'Ofertas', description: 'Promociones por producto' },
+    { to: '/customers', label: 'Clientes', description: 'Ficha e historial comercial' },
     { to: '/users', label: 'Usuarios', description: 'Alta, edición y desactivación' },
     { to: '/reports', label: 'Reportes', description: 'Ventas del día y del mes' },
     { to: '/audit', label: 'Auditoría', description: 'Trazabilidad de acciones' },
@@ -98,8 +99,8 @@ export function AppLayout() {
           <header className="border-b border-slate-800 bg-slate-950/80 px-6 py-4 backdrop-blur">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm text-slate-400">Fases 1 y 2 en evolución</p>
-                <h2 className="text-xl font-semibold">Operación offline con catálogo tipado</h2>
+                <p className="text-sm text-slate-400">Fases 1, 2 y 3 en evolución</p>
+                <h2 className="text-xl font-semibold">Operación offline con catálogo y clientes</h2>
               </div>
               <div className="rounded-full border border-slate-800 px-4 py-2 text-sm text-slate-300">
                 Main process + SQLite + IPC por dominio

@@ -4,6 +4,7 @@ import { ChangePasswordPage } from '@/pages/login/ChangePasswordPage'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { CatalogPage } from '@/pages/catalog/CatalogPage'
 import { SuppliersPage } from '@/pages/catalog/SuppliersPage'
+import { CustomersPage } from '@/pages/customers/CustomersPage'
 import { useAuth } from '@/shared/auth-context'
 import { AppLayout } from '@/shared/layout'
 import { ProtectedRoute } from '@/shared/protected-route'
@@ -42,9 +43,9 @@ export default function App() {
             <Route path="/audit" element={<PlaceholderPage title="Auditoría" description="Canal reservado para trazabilidad administrativa. La arquitectura ya deja el lugar correcto para meter el módulo cuando toque." bullets={["Listado de eventos críticos", "Filtros por usuario y fecha", "Payload resumido sin secretos"]} />} />
           </Route>
 
-          <Route element={<RoleRoute allowedRoles={['vendor']} />}>
+          <Route element={<RoleRoute allowedRoles={['admin', 'vendor']} />}>
             <Route path="/pos" element={<PlaceholderPage title="POS del vendedor" description="La navegación del vendedor ya entra al área correcta. El checkout atómico va en la fase de ventas, no antes." bullets={["Búsqueda de productos", "Carrito con validación de stock", "Ticket post-venta"]} />} />
-            <Route path="/customers" element={<PlaceholderPage title="Clientes" description="El módulo de clientes se habilita para vendedor, pero su implementación real se aborda en la fase correspondiente." bullets={["ABM mínimo de clientes", "Búsqueda por nombre o teléfono", "Historial de compras"]} />} />
+            <Route path="/customers" element={<CustomersPage />} />
           </Route>
 
           <Route element={<RoleRoute allowedRoles={['admin', 'stock']} />}>

@@ -89,6 +89,54 @@ export function migrateDatabase() {
       WHERE id = OLD.id;
     END;
 
+    CREATE TABLE IF NOT EXISTS customers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      phone TEXT,
+      email TEXT,
+      address TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_customers_name ON customers(name);
+    CREATE INDEX IF NOT EXISTS idx_customers_phone ON customers(phone);
+
+    CREATE TRIGGER IF NOT EXISTS customers_set_updated_at
+    AFTER UPDATE ON customers
+    FOR EACH ROW
+    BEGIN
+      UPDATE customers
+      SET updated_at = CURRENT_TIMESTAMP
+      WHERE id = OLD.id;
+    END;
+
+    CREATE TABLE IF NOT EXISTS sales (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      customer_id INTEGER REFERENCES customers(id) ON DELETE RESTRICT,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+      total INTEGER NOT NULL CHECK(total >= 0),
+      payment_method TEXT NOT NULL CHECK(payment_method IN ('cash', 'card', 'transfer')),
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_sales_customer ON sales(customer_id);
+    CREATE INDEX IF NOT EXISTS idx_sales_user ON sales(user_id);
+    CREATE INDEX IF NOT EXISTS idx_sales_date ON sales(created_at);
+
+    CREATE TABLE IF NOT EXISTS sale_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      sale_id INTEGER NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
+      product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
+      quantity INTEGER NOT NULL CHECK(quantity > 0),
+      unit_price INTEGER NOT NULL CHECK(unit_price >= 0),
+      discount_percent INTEGER NOT NULL DEFAULT 0 CHECK(discount_percent BETWEEN 0 AND 99),
+      subtotal INTEGER NOT NULL CHECK(subtotal >= 0)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_sale_items_sale ON sale_items(sale_id);
+    CREATE INDEX IF NOT EXISTS idx_sale_items_product ON sale_items(product_id);
+
     CREATE TABLE IF NOT EXISTS stock_movements (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
@@ -102,6 +150,8 @@ export function migrateDatabase() {
 
     CREATE INDEX IF NOT EXISTS idx_stock_movements_product ON stock_movements(product_id);
     CREATE INDEX IF NOT EXISTS idx_stock_movements_user ON stock_movements(user_id);
+    CREATE INDEX IF NOT EXISTS idx_stock_movements_date ON stock_movements(created_at);
+    CREATE INDEX IF NOT EXISTS idx_stock_movements_reason ON stock_movements(reason);
 
     CREATE TABLE IF NOT EXISTS audit_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,

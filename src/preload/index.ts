@@ -4,9 +4,13 @@ import type {
   ApiResponse,
   Category,
   ChangePasswordInput,
+  CreateCustomerInput,
   CreateCategoryInput,
   CreateProductInput,
   CreateSupplierInput,
+  Customer,
+  CustomerFilters,
+  CustomerSaleSummary,
   DeleteCategoryInput,
   LoginInput,
   Product,
@@ -15,6 +19,7 @@ import type {
   SetProductActiveInput,
   SetSupplierActiveInput,
   Supplier,
+  UpdateCustomerInput,
   UpdateCategoryInput,
   UpdateProductInput,
   UpdateSupplierInput,
@@ -51,6 +56,15 @@ const api = {
       ipcRenderer.invoke(IPC.catalog.updateProduct, input) as Promise<ApiResponse<Product>>,
     setProductActive: (input: SetProductActiveInput) =>
       ipcRenderer.invoke(IPC.catalog.setProductActive, input) as Promise<ApiResponse<Product>>,
+  },
+  customers: {
+    list: (filters: CustomerFilters) => ipcRenderer.invoke(IPC.customers.list, filters) as Promise<ApiResponse<Customer[]>>,
+    create: (input: CreateCustomerInput) =>
+      ipcRenderer.invoke(IPC.customers.create, input) as Promise<ApiResponse<Customer>>,
+    update: (input: UpdateCustomerInput) =>
+      ipcRenderer.invoke(IPC.customers.update, input) as Promise<ApiResponse<Customer>>,
+    history: (customerId: number) =>
+      ipcRenderer.invoke(IPC.customers.history, { customerId }) as Promise<ApiResponse<CustomerSaleSummary[]>>,
   },
 }
 

@@ -19,4 +19,10 @@ export const IPC = {
     updateProduct: 'catalog:products:update',
     setProductActive: 'catalog:products:set-active',
   },
+  customers: {
+    list: 'customers:list',
+    create: 'customers:create',
+    update: 'customers:update',
+    history: 'customers:history',
+  },
 } as const
