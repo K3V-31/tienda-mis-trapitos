@@ -3,6 +3,7 @@ import type { CheckoutInput, PosProduct, SaleTicket } from '../../shared/types'
 import { getDb } from '../db/client'
 import { auditLog, categories, customers, products, saleItems, sales, stockMovements } from '../db/schema'
 import { requireAuth, requireRole } from '../session'
+import { getActiveOfferMap } from './offers.service'
 
 function requireSalesAccess() {
   const user = requireAuth()
@@ -34,7 +35,7 @@ export const salesService = {
     const normalizedSearch = search?.trim()
     const term = normalizedSearch ? `%${normalizedSearch}%` : null
 
-    return db
+    const rows = await db
       .select({
         id: products.id,
         name: products.name,
@@ -52,6 +53,19 @@ export const salesService = {
           : eq(products.active, true),
       )
       .orderBy(asc(products.name), asc(products.id))
+
+    const activeOffers = await getActiveOfferMap(rows.map((row) => row.id))
+
+    return rows.map((row) => {
+      const activeOffer = activeOffers.get(row.id)
+      const activeDiscountPercent = activeOffer?.discountPercent ?? 0
+
+      return {
+        ...row,
+        activeDiscountPercent,
+        priceWithDiscountInCents: Math.round(row.priceInCents * (100 - activeDiscountPercent) / 100),
+      }
+    })
   },
 
   async checkout(input: CheckoutInput): Promise<SaleTicket> {
@@ -79,6 +93,8 @@ export const salesService = {
         where: inArray(products.id, requestedProductIds),
       })
 
+      const activeOffers = await getActiveOfferMap(requestedProductIds, tx)
+
       if (dbProducts.length !== requestedProductIds.length) {
         throw new Error('product_not_found')
       }
@@ -100,7 +116,7 @@ export const salesService = {
           throw new Error('insufficient_stock')
         }
 
-        const discountPercent = 0
+        const discountPercent = activeOffers.get(product.id)?.discountPercent ?? 0
         const subtotalInCents = Math.round(item.quantity * product.price * (100 - discountPercent) / 100)
 
         return {

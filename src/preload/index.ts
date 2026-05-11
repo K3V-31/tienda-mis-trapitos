@@ -5,15 +5,22 @@ import type {
   Category,
   ChangePasswordInput,
   CheckoutInput,
+  CreateOfferInput,
   CreateCustomerInput,
   CreateCategoryInput,
   CreateProductInput,
+  CreateStockAdjustmentInput,
+  CreateStockEntryInput,
   CreateSupplierInput,
   Customer,
   CustomerFilters,
   CustomerSaleSummary,
   DeleteCategoryInput,
+  DeleteOfferInput,
+  InventoryMovement,
   LoginInput,
+  Offer,
+  OfferFilters,
   PosProduct,
   Product,
   ProductFilters,
@@ -22,6 +29,7 @@ import type {
   SetProductActiveInput,
   SetSupplierActiveInput,
   Supplier,
+  UpdateOfferInput,
   UpdateCustomerInput,
   UpdateCategoryInput,
   UpdateProductInput,
@@ -73,6 +81,19 @@ const api = {
     searchProducts: (search?: string) =>
       ipcRenderer.invoke(IPC.sales.searchProducts, { search }) as Promise<ApiResponse<PosProduct[]>>,
     checkout: (input: CheckoutInput) => ipcRenderer.invoke(IPC.sales.checkout, input) as Promise<ApiResponse<SaleTicket>>,
+  },
+  offers: {
+    list: (filters: OfferFilters) => ipcRenderer.invoke(IPC.offers.list, filters) as Promise<ApiResponse<Offer[]>>,
+    create: (input: CreateOfferInput) => ipcRenderer.invoke(IPC.offers.create, input) as Promise<ApiResponse<Offer>>,
+    update: (input: UpdateOfferInput) => ipcRenderer.invoke(IPC.offers.update, input) as Promise<ApiResponse<Offer>>,
+    delete: (input: DeleteOfferInput) => ipcRenderer.invoke(IPC.offers.delete, input) as Promise<ApiResponse<{ id: number }>>,
+  },
+  inventory: {
+    listMovements: () => ipcRenderer.invoke(IPC.inventory.listMovements) as Promise<ApiResponse<InventoryMovement[]>>,
+    createEntry: (input: CreateStockEntryInput) =>
+      ipcRenderer.invoke(IPC.inventory.createEntry, input) as Promise<ApiResponse<{ processedCount: number }>>,
+    createAdjustment: (input: CreateStockAdjustmentInput) =>
+      ipcRenderer.invoke(IPC.inventory.createAdjustment, input) as Promise<ApiResponse<{ productId: number; stock: number }>>,
   },
 }
 

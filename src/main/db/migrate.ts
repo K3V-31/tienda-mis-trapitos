@@ -89,6 +89,18 @@ export function migrateDatabase() {
       WHERE id = OLD.id;
     END;
 
+    CREATE TABLE IF NOT EXISTS offers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+      discount_percent INTEGER NOT NULL CHECK(discount_percent BETWEEN 1 AND 99),
+      start_at TEXT NOT NULL,
+      end_at TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_offers_product ON offers(product_id);
+    CREATE INDEX IF NOT EXISTS idx_offers_dates ON offers(start_at, end_at);
+
     CREATE TABLE IF NOT EXISTS customers (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,

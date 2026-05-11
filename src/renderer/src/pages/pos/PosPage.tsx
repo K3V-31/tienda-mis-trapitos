@@ -94,7 +94,7 @@ export function PosPage() {
     () =>
       cart.map((item) => ({
         ...item,
-        subtotalInCents: item.product.priceInCents * item.quantity,
+        subtotalInCents: item.product.priceWithDiscountInCents * item.quantity,
       })),
     [cart],
   )
@@ -397,7 +397,15 @@ export function PosPage() {
                     </div>
 
                     <div className="text-right">
-                      <p className="text-lg font-semibold text-emerald-300">{formatCurrency(product.priceInCents)}</p>
+                      {product.activeDiscountPercent > 0 ? (
+                        <>
+                          <p className="text-sm text-slate-500 line-through">{formatCurrency(product.priceInCents)}</p>
+                          <p className="text-lg font-semibold text-emerald-300">{formatCurrency(product.priceWithDiscountInCents)}</p>
+                          <p className="text-xs text-emerald-200">{product.activeDiscountPercent}% off</p>
+                        </>
+                      ) : (
+                        <p className="text-lg font-semibold text-emerald-300">{formatCurrency(product.priceInCents)}</p>
+                      )}
                       <button
                         type="button"
                         onClick={() => addToCart(product)}
@@ -427,7 +435,11 @@ export function PosPage() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h4 className="font-medium text-white">{item.product.name}</h4>
-                      <p className="mt-1 text-sm text-slate-400">{formatCurrency(item.product.priceInCents)} por unidad</p>
+                      <p className="mt-1 text-sm text-slate-400">
+                        {item.product.activeDiscountPercent > 0
+                          ? `${formatCurrency(item.product.priceInCents)} → ${formatCurrency(item.product.priceWithDiscountInCents)} por unidad · ${item.product.activeDiscountPercent}% off`
+                          : `${formatCurrency(item.product.priceInCents)} por unidad`}
+                      </p>
                     </div>
                     <button type="button" onClick={() => updateQuantity(item.product.id, 0)} className="text-sm text-rose-300 hover:text-rose-200">
                       Quitar

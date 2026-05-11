@@ -29,4 +29,15 @@ export const IPC = {
     searchProducts: 'sales:products:search',
     checkout: 'sales:checkout',
   },
+  offers: {
+    list: 'offers:list',
+    create: 'offers:create',
+    update: 'offers:update',
+    delete: 'offers:delete',
+  },
+  inventory: {
+    listMovements: 'inventory:movements:list',
+    createEntry: 'inventory:entries:create',
+    createAdjustment: 'inventory:adjustments:create',
+  },
 } as const

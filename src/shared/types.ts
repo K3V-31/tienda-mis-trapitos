@@ -2,6 +2,10 @@ export type UserRole = 'admin' | 'vendor' | 'stock'
 
 export type PaymentMethod = 'cash' | 'card' | 'transfer'
 
+export type OfferStatus = 'active' | 'scheduled' | 'expired'
+
+export type StockMovementReason = 'sale' | 'entry' | 'adjustment'
+
 export type SessionUser = {
   id: number
   username: string
@@ -69,6 +73,24 @@ export type Product = {
   updatedAt: string
 }
 
+export type Offer = {
+  id: number
+  productId: number
+  productName: string
+  categoryName: string
+  discountPercent: number
+  startAt: string
+  endAt: string
+  status: OfferStatus
+  hasOverlap: boolean
+  createdAt: string
+}
+
+export type OfferFilters = {
+  productId?: number | null
+  status?: 'all' | OfferStatus
+}
+
 export type ProductFilters = {
   search?: string
   categoryId?: number | null
@@ -134,6 +156,21 @@ export type SetProductActiveInput = {
   active: boolean
 }
 
+export type CreateOfferInput = {
+  productId: number
+  discountPercent: number
+  startAt: string
+  endAt: string
+}
+
+export type UpdateOfferInput = CreateOfferInput & {
+  id: number
+}
+
+export type DeleteOfferInput = {
+  id: number
+}
+
 export type Customer = {
   id: number
   name: string
@@ -180,6 +217,8 @@ export type PosProduct = {
   size: string | null
   color: string | null
   priceInCents: number
+  activeDiscountPercent: number
+  priceWithDiscountInCents: number
   stock: number
 }
 
@@ -223,4 +262,33 @@ export type SaleTicket = {
     email: string | null
   } | null
   items: SaleTicketItem[]
+}
+
+export type StockEntryItemInput = {
+  productId: number
+  quantity: number
+}
+
+export type CreateStockEntryInput = {
+  items: StockEntryItemInput[]
+  note?: string | null
+}
+
+export type CreateStockAdjustmentInput = {
+  productId: number
+  delta: number
+  note: string
+}
+
+export type InventoryMovement = {
+  id: number
+  productId: number
+  productName: string
+  categoryName: string
+  delta: number
+  reason: StockMovementReason
+  note: string | null
+  referenceId: number | null
+  userName: string
+  createdAt: string
 }

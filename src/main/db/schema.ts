@@ -47,6 +47,17 @@ export const products = sqliteTable('products', {
   updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 
+export const offers = sqliteTable('offers', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  productId: integer('product_id')
+    .notNull()
+    .references(() => products.id),
+  discountPercent: integer('discount_percent').notNull(),
+  startAt: text('start_at').notNull(),
+  endAt: text('end_at').notNull(),
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+})
+
 export const customers = sqliteTable('customers', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
@@ -113,4 +124,5 @@ export type UserRow = typeof users.$inferSelect
 export type CategoryRow = typeof categories.$inferSelect
 export type SupplierRow = typeof suppliers.$inferSelect
 export type ProductRow = typeof products.$inferSelect
+export type OfferRow = typeof offers.$inferSelect
 export type CustomerRow = typeof customers.$inferSelect

@@ -5,6 +5,8 @@ import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { CatalogPage } from '@/pages/catalog/CatalogPage'
 import { SuppliersPage } from '@/pages/catalog/SuppliersPage'
 import { CustomersPage } from '@/pages/customers/CustomersPage'
+import { InventoryPage } from '@/pages/inventory/InventoryPage'
+import { OffersPage } from '@/pages/offers/OffersPage'
 import { PosPage } from '@/pages/pos/PosPage'
 import { useAuth } from '@/shared/auth-context'
 import { AppLayout } from '@/shared/layout'
@@ -52,8 +54,8 @@ export default function App() {
           <Route element={<RoleRoute allowedRoles={['admin', 'stock']} />}>
             <Route path="/products" element={<CatalogPage />} />
             <Route path="/suppliers" element={<SuppliersPage />} />
-            <Route path="/inventory" element={<PlaceholderPage title="Inventario" description="La sección existe en el shell pero la lógica de movimientos va en una fase posterior." bullets={["Entradas de mercancía", "Ajustes manuales", "Indicadores de stock bajo"]} />} />
-            <Route path="/offers" element={<PlaceholderPage title="Ofertas" description="Sección preparada para promociones por producto. La base del flujo por roles ya quedó resuelta." bullets={["Vigencia start/end", "Descuento automático en POS", "Warnings por solapamiento"]} />} />
+            <Route path="/inventory" element={<InventoryPage />} />
+            <Route path="/offers" element={<OffersPage />} />
           </Route>
 
           <Route path="/" element={<HomeRedirect />} />
