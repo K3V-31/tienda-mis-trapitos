@@ -68,15 +68,16 @@ Restricciones:
 
 | Capa | Tecnología | Justificación |
 |------|-----------|---------------|
-| Shell de escritorio | **Electron** (latest LTS) | Empaquetado mono-PC, acceso a filesystem |
-| Renderer (UI) | **Vite + React 19 + TanStack Router (SPA, file-based)** | SPA pura: el renderer carga `index.html` local, sin servidor ni SSR |
-| Estilos | **Tailwind v4 + shadcn/ui** | Componentes accesibles, theming simple |
-| Estado servidor | **TanStack Query** | Cache + mutaciones sobre el cliente IPC tipado |
-| BD | **SQLite vía `better-sqlite3`** (síncrono, en main process) | Local, transaccional, síncrono = simple |
-| ORM / migraciones | **Drizzle ORM + drizzle-kit** | Tipado fuerte, migraciones generadas |
-| Auth | Tabla `users` propia con `bcrypt` | Sólo usuarios locales en una PC, no se justifica un framework de auth |
-| IPC renderer ↔ main | **`contextBridge` + handlers tipados** (un módulo por dominio) | Sin tRPC ni capas extra |
-| Empaquetado | **electron-builder** target NSIS (Windows) | Instalador `.exe` simple |
+| Shell de escritorio | **Electron** + **electron-vite** | Empaquetado mono-PC; electron-vite unifica el build de main + preload + renderer |
+| Renderer (UI) | **React 19** + **React Router v7** (SPA) | SPA pura: carga `index.html` local, sin servidor ni SSR |
+| Estilos | **Tailwind v4** + **shadcn/ui** | Componentes accesibles listos; theming via CSS vars oklch |
+| Validación | **Zod** | Schemas compartidos: IPC handlers en main + formularios en renderer |
+| BD | **SQLite** vía **`better-sqlite3`** (síncrono, en main process) | Local, transaccional, síncrono = sin complejidad de async |
+| ORM / migraciones | **Drizzle ORM** + **drizzle-kit** | Tipado fuerte end-to-end; migraciones generadas automáticamente |
+| Auth | Tabla `users` + **bcrypt** | Usuarios locales en una PC; no se justifica framework externo |
+| IPC renderer ↔ main | **`contextBridge`** + handlers tipados por dominio | Sin tRPC ni capas extra; directo y auditable |
+| Estado renderer | Custom hooks (`useState` + `useEffect`) | SQLite local = latencia cero; no se necesita capa de cache |
+| Empaquetado | **electron-builder** target NSIS (Windows) | Instalador `.exe` de un clic |
 
 ---
 
@@ -90,10 +91,10 @@ Restricciones:
 │  │   Renderer      │  IPC    │   Main process   │  │
 │  │  (React SPA)    │◄───────►│  (Node + SQLite) │  │
 │  │                 │         │                  │  │
-│  │  - TanStack     │         │  - better-sqlite3│  │
-│  │    Router       │         │  - Drizzle ORM   │  │
-│  │  - Query        │         │  - bcrypt        │  │
-│  │  - shadcn UI    │         │  - IPC handlers  │  │
+│  │  - React Router │         │  - better-sqlite3│  │
+│  │  - shadcn UI    │         │  - Drizzle ORM   │  │
+│  │  - Tailwind v4  │         │  - bcrypt        │  │
+│  │  - Zod          │         │  - IPC handlers  │  │
 │  └─────────────────┘         └──────────────────┘  │
 │                                       │              │
 │                                       ▼              │
@@ -291,7 +292,7 @@ El MVP se considera entregado cuando, en una PC Windows limpia:
 | R1 | `better-sqlite3` requiere recompilación nativa por versión de Electron | Mitigación: `electron-rebuild` en postinstall |
 | R2 | Sin code signing, Windows Defender / SmartScreen puede marcar el `.exe` | Aceptado para MVP — se mostrará advertencia al instalar |
 | R3 | Empaquetar las migraciones de Drizzle con la app (`extraResources`) y resolver el path con `process.resourcesPath` cuando está `app.isPackaged` | A validar al cierre de Fase 7 |
-| R4 | BD inicial: arranca vacía y se crea el admin seed en el primer run vía `electron/main/db/seed.ts` | Decidido |
+| R4 | BD inicial: arranca vacía y se crea el admin seed en el primer run vía `src/main/db/seed.ts` | Decidido |
 
 ---
 

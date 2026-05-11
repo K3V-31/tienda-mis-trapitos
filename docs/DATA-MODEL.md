@@ -297,7 +297,7 @@ Registro de operaciones críticas.
 ## 4. Schema Drizzle (esqueleto)
 
 ```ts
-// electron/main/db/schema.ts
+// src/main/db/schema.ts
 import { sqliteTable, integer, text, index, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 
@@ -494,7 +494,7 @@ Generada con `drizzle-kit generate`. El primer `0000_initial.sql` debe contener:
 
 1. Crear todas las tablas en orden (respetando FKs).
 2. Crear todos los índices.
-3. **No insertar datos.** El seed del admin se hace por código (`electron/main/db/seed.ts`) para usar bcrypt.
+3. **No insertar datos.** El seed del admin se hace por código (`src/main/db/seed.ts`) para usar bcrypt.
 
 ---
 

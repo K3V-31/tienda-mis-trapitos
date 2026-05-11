@@ -50,13 +50,12 @@ Electron tiene dos procesos principales. La app respeta esa división estricta:
 │                (Chromium, React SPA)                          │
 │                                                               │
 │  ┌────────────┐  ┌──────────────┐  ┌───────────────────┐    │
-│  │   React    │  │  TanStack    │  │   shadcn/ui       │    │
-│  │   19       │  │  Router      │  │   + Tailwind v4   │    │
+│  │   React    │  │  React       │  │   shadcn/ui       │    │
+│  │   19       │  │  Router v7   │  │   + Tailwind v4   │    │
 │  └────────────┘  └──────────────┘  └───────────────────┘    │
 │                                                               │
 │  ┌────────────────────────────────────────────────────────┐  │
-│  │             TanStack Query (cache + mutations)         │  │
-│  │   queryFn: () => window.api.products.list()            │  │
+│  │   Custom hooks → window.api.*()  +  Zod (validación)  │  │
 │  └────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -68,16 +67,18 @@ Electron tiene dos procesos principales. La app respeta esa división estricta:
 
 ---
 
-## 2. Estructura de carpetas propuesta
+## 2. Estructura de carpetas
+
+La estructura sigue la convención de **electron-vite**: `src/main/`, `src/preload/` y `src/renderer/` son las tres raíces del build. El renderer es la SPA React; todo lo que toca Node o SQLite vive en main.
 
 ```
-tienda-mis-trapitos/
-├── electron/                       # Código del main + preload
-│   ├── main/
-│   │   ├── index.ts                # entry: app.whenReady, createWindow
-│   │   ├── window.ts               # creación de BrowserWindow
-│   │   ├── ipc/                    # handlers por dominio
-│   │   │   ├── index.ts            # registra todos los handlers
+tienda-trapitos/
+├── src/
+│   ├── main/                        # Main process — Node.js, accede a todo
+│   │   ├── index.ts                 # entry: app.whenReady + createWindow
+│   │   ├── window.ts                # configuración de BrowserWindow
+│   │   ├── ipc/
+│   │   │   ├── index.ts             # registra todos los handlers al arrancar
 │   │   │   ├── auth.ts
 │   │   │   ├── products.ts
 │   │   │   ├── customers.ts
@@ -88,58 +89,79 @@ tienda-mis-trapitos/
 │   │   │   ├── audit.ts
 │   │   │   └── backup.ts
 │   │   ├── db/
-│   │   │   ├── client.ts           # better-sqlite3 + drizzle init
-│   │   │   ├── schema.ts           # tablas Drizzle
-│   │   │   ├── migrate.ts          # corre migraciones al arrancar
-│   │   │   └── seed.ts             # admin inicial
-│   │   ├── services/               # lógica de dominio (no IPC)
+│   │   │   ├── client.ts            # better-sqlite3 + drizzle init
+│   │   │   ├── schema.ts            # tablas Drizzle (fuente de verdad del schema)
+│   │   │   ├── migrate.ts           # corre migraciones al arrancar
+│   │   │   └── seed.ts              # crea el admin inicial si la BD está vacía
+│   │   ├── services/                # lógica de negocio (sin IPC, pura)
 │   │   │   ├── auth.service.ts
-│   │   │   ├── sales.service.ts    # transacción atómica
+│   │   │   ├── sales.service.ts     # transacción atómica de checkout
 │   │   │   ├── inventory.service.ts
-│   │   │   └── audit.service.ts    # wrapper para escribir al log
-│   │   └── session.ts              # sesión en memoria del usuario activo
+│   │   │   └── audit.service.ts
+│   │   └── session.ts               # singleton de sesión en memoria
+│   │
 │   ├── preload/
-│   │   └── index.ts                # contextBridge.exposeInMainWorld('api', ...)
-│   └── shared/
-│       ├── types.ts                # tipos compartidos main/renderer
-│       └── ipc-channels.ts         # constantes de canales
+│   │   └── index.ts                 # contextBridge → expone window.api tipado
+│   │
+│   └── renderer/
+│       ├── index.html               # entry HTML que carga /src/main.tsx
+│       └── src/                     # SPA React (Vite lo procesa desde acá)
+│           ├── main.tsx             # ReactDOM.createRoot
+│           ├── App.tsx              # <BrowserRouter> + rutas + providers
+│           ├── index.css            # @import "tailwindcss" + shadcn CSS vars
+│           ├── lib/
+│           │   └── utils.ts         # cn() (clsx + tailwind-merge)
+│           ├── components/
+│           │   └── ui/              # componentes shadcn (auto-generados con CLI)
+│           ├── pages/               # un archivo/carpeta por pantalla
+│           │   ├── login/
+│           │   │   └── LoginPage.tsx
+│           │   ├── pos/
+│           │   │   └── PosPage.tsx
+│           │   ├── products/
+│           │   │   ├── ProductsPage.tsx
+│           │   │   └── ProductFormPage.tsx
+│           │   ├── customers/
+│           │   ├── suppliers/
+│           │   ├── offers/
+│           │   ├── inventory/
+│           │   ├── reports/
+│           │   ├── audit/
+│           │   └── users/
+│           ├── features/            # hooks y schemas Zod por dominio
+│           │   ├── auth/
+│           │   │   ├── use-auth.ts          # hook que llama window.api.auth.*
+│           │   │   └── schemas.ts           # Zod: LoginInput, etc.
+│           │   ├── products/
+│           │   │   ├── use-products.ts
+│           │   │   └── schemas.ts
+│           │   ├── sales/
+│           │   │   ├── use-cart.ts          # estado local del carrito
+│           │   │   └── schemas.ts
+│           │   └── ...
+│           └── shared/
+│               ├── auth-context.tsx         # React Context de sesión activa
+│               ├── layout.tsx               # shell con sidebar según rol
+│               └── protected-route.tsx      # redirige a /login si no hay sesión
 │
-├── src/                            # Renderer (React SPA, lo que ya existe)
-│   ├── app/                        # shell, providers, layout
-│   ├── routes/                     # TanStack Router (file-based)
-│   │   ├── __root.tsx
-│   │   ├── login.tsx
-│   │   ├── _app/                   # rutas autenticadas
-│   │   │   ├── pos.tsx             # POS para vendedor
-│   │   │   ├── products/
-│   │   │   ├── customers/
-│   │   │   ├── suppliers/
-│   │   │   ├── offers/
-│   │   │   ├── inventory/
-│   │   │   ├── reports/
-│   │   │   ├── audit.tsx
-│   │   │   └── users.tsx
-│   ├── features/                   # lógica por feature (queries, forms)
-│   │   ├── auth/
-│   │   ├── products/
-│   │   ├── sales/
-│   │   └── ...
-│   ├── shared/                     # ui, hooks, lib
-│   ├── router.tsx
-│   └── styles.css
+├── src/shared/                      # tipos y constantes compartidos main ↔ renderer
+│   ├── ipc-channels.ts              # constantes de canales ('products:list', etc.)
+│   └── types.ts                     # tipos de dominio sin deps de Node ni DOM
 │
-├── drizzle/                        # migraciones generadas
-├── docs/                           # PRD, US, este archivo
-├── electron-builder.yml            # config de empaquetado
-├── vite.config.ts                  # Vite config para el renderer
+├── drizzle/                         # migraciones SQL generadas por drizzle-kit
+├── out/                             # build output de electron-vite (no commitear)
+├── docs/
+├── electron.vite.config.ts          # config unificada main + preload + renderer
 ├── tsconfig.json
+├── components.json                  # config de shadcn/ui
 └── package.json
 ```
 
-**Notas:**
-- `electron/` contiene main + preload. `src/` contiene la SPA del renderer (Vite + React + TanStack Router file-based, **sin SSR**).
-- Las rutas de `src/routes/_app/` quedan protegidas por un layout que verifica sesión consultando al main vía IPC.
-- `electron/shared/` se importa tanto desde main como desde renderer (solo tipos, sin código de runtime).
+**Reglas de la estructura:**
+- `src/main/` y `src/preload/` tienen acceso a Node.js. `src/renderer/src/` **no**.
+- `src/shared/` solo puede contener TypeScript puro: tipos, enums, constantes. Sin `import` de Node ni de `electron`. Tanto main como renderer lo importan con paths relativos.
+- Los componentes shadcn van siempre en `src/renderer/src/components/ui/` y se agregan con `npx shadcn@latest add <nombre>`.
+- `features/` contiene la lógica de cada módulo de negocio: hooks que llaman a `window.api`, schemas Zod para validar formularios en el renderer.
 
 ---
 
@@ -147,7 +169,7 @@ tienda-mis-trapitos/
 
 ### 3.1 Definición de canales
 
-Constantes en `electron/shared/ipc-channels.ts`:
+Constantes en `src/shared/ipc-channels.ts`:
 
 ```ts
 export const IPC = {
@@ -178,7 +200,7 @@ export const IPC = {
 Convención: cada handler valida con Zod, ejecuta el service y devuelve `{ ok: true, data }` o `{ ok: false, error }`. Nunca lanza excepciones a través de IPC.
 
 ```ts
-// electron/main/ipc/products.ts
+// src/main/ipc/products.ts
 import { ipcMain } from 'electron';
 import { z } from 'zod';
 import { IPC } from '../../shared/ipc-channels';
@@ -206,7 +228,7 @@ export function registerProductHandlers() {
 ### 3.3 Preload tipado
 
 ```ts
-// electron/preload/index.ts
+// src/preload/index.ts
 import { contextBridge, ipcRenderer } from 'electron';
 import { IPC } from '../shared/ipc-channels';
 
@@ -231,29 +253,65 @@ export type Api = typeof api;
 declare global { interface Window { api: Api } }
 ```
 
-### 3.4 Uso en renderer (con TanStack Query)
+### 3.4 Uso en renderer (custom hooks)
+
+El renderer llama a `window.api.*` directamente desde custom hooks. No hay capa de cache extra — SQLite es local y síncrono, la latencia es despreciable.
 
 ```ts
-// src/features/products/queries.ts
-import { useQuery, useMutation } from '@tanstack/react-query';
+// src/renderer/src/features/products/use-products.ts
+import { useState, useEffect } from 'react';
 
-export function useProducts(filters) {
-  return useQuery({
-    queryKey: ['products', filters],
-    queryFn: async () => {
-      const res = await window.api.products.list(filters);
-      if (!res.ok) throw new Error(res.error);
-      return res.data;
-    },
-  });
+export function useProducts(filters?: ProductFilters) {
+  const [data, setData] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    window.api.products.list(filters)
+      .then(res => {
+        if (!res.ok) throw new Error(res.error);
+        setData(res.data);
+      })
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [JSON.stringify(filters)]);
+
+  return { data, loading, error };
 }
+```
+
+Las mutaciones (crear, editar) llaman a `window.api.*` directamente y luego re-ejecutan el hook de lista:
+
+```ts
+async function createProduct(input: CreateProductInput) {
+  const res = await window.api.products.create(input);
+  if (!res.ok) throw new Error(res.error);
+  return res.data;
+}
+```
+
+La validación de formularios del renderer usa **Zod** para parsear antes de enviar al main:
+
+```ts
+// src/renderer/src/features/products/schemas.ts
+import { z } from 'zod';
+
+export const CreateProductSchema = z.object({
+  name: z.string().min(1),
+  price: z.number().positive(),
+  categoryId: z.number().int(),
+  stock: z.number().int().min(0),
+});
+
+export type CreateProductInput = z.infer<typeof CreateProductSchema>;
 ```
 
 ---
 
 ## 4. Sesión y autorización
 
-- La sesión vive en memoria del **main process** (`electron/main/session.ts`), como un singleton: `currentUser: User | null`.
+- La sesión vive en memoria del **main process** (`src/main/session.ts`), como un singleton: `currentUser: User | null`.
 - Tras `auth:login` exitoso, se setea; tras `auth:logout` o cierre de ventana, se limpia.
 - Cada handler crítico llama `requireAuth()` y opcionalmente `requireRole(['admin'])`. Si no se cumple, devuelve `{ ok: false, error: 'unauthorized' }`.
 - El renderer **no** mantiene la sesión; consulta `auth:currentUser` al arrancar y al cambiar de ruta protegida.
@@ -267,7 +325,7 @@ export function useProducts(filters) {
 Patrón para no repetir código en cada handler:
 
 ```ts
-// electron/main/services/audit.service.ts
+// src/main/services/audit.service.ts
 export async function logAudit(input: {
   userId: number;
   action: string;       // 'product.create', 'sale.checkout'
@@ -296,7 +354,7 @@ Cada service que muta estado llama `logAudit` al final, dentro de la misma trans
 Toda la operación de cobro es **una sola transacción SQLite**. Si algo falla, nada se persiste.
 
 ```ts
-// electron/main/services/sales.service.ts
+// src/main/services/sales.service.ts
 export function checkout(input, user) {
   return db.transaction((tx) => {
     // 1. Re-validar stock con lock
@@ -344,18 +402,14 @@ export function checkout(input, user) {
 
 ## 7. Build y empaquetado
 
-### 7.1 Scripts de package.json (propuesta)
+### 7.1 Scripts de package.json
 
 ```json
 {
   "scripts": {
-    "dev:renderer": "vite dev --port 3300",
-    "dev:electron": "electron-vite dev",
     "dev": "electron-vite dev",
-    "build:renderer": "vite build",
-    "build:electron": "electron-vite build",
     "build": "electron-vite build",
-    "package": "electron-builder --dir",
+    "start": "electron-vite preview",
     "dist": "electron-builder",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
@@ -363,7 +417,7 @@ export function checkout(input, user) {
 }
 ```
 
-Se recomienda usar **`electron-vite`** para integrar Vite con el lifecycle de Electron (un solo comando para correr main + preload + renderer en dev con HMR).
+`electron-vite` corre main + preload + renderer en un solo proceso con HMR en el renderer. El build produce `out/main/`, `out/preload/` y `out/renderer/`; electron-builder empaqueta desde ahí.
 
 ### 7.2 electron-builder.yml
 
@@ -402,7 +456,7 @@ Configurar `postinstall` script para automatizarlo.
 - Al arrancar el main, se ejecutan las migraciones pendientes contra `userData/app.db`:
 
 ```ts
-// electron/main/db/migrate.ts
+// src/main/db/migrate.ts
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { db } from './client';
 import path from 'path';
@@ -428,12 +482,14 @@ Si las migraciones fallan, la app muestra una pantalla de error y ofrece importa
 
 ---
 
-## 10. Decisiones técnicas a confirmar al iniciar Fase 0
+## 10. Decisiones técnicas adoptadas
 
-| Decisión | Opción A | Opción B | Recomendación |
-|----------|----------|----------|---------------|
-| Wrapper de Vite/Electron | `electron-vite` | Setup manual | **A** — menos boilerplate |
-| Routing del renderer | TanStack Router (file-based, SPA) | React Router | **A** — file-based + tipado fuerte |
-| Forms | TanStack Form | react-hook-form | A elegir |
-| Date library | date-fns | dayjs | A elegir; ninguno crítico |
-| Tests E2E | Playwright para Electron | Skip en MVP | **Skip** — confía en pruebas manuales para MVP |
+| Área | Decisión | Justificación |
+|------|----------|---------------|
+| Build / dev | **electron-vite** | Un solo comando para main + preload + renderer con HMR |
+| Routing del renderer | **React Router v7** | SPA estándar, sin file-based routing (estructura manual en `pages/`) |
+| Estado servidor | **Custom hooks** (`useState` + `useEffect`) | SQLite local = latencia cero; no justifica capa de cache externa |
+| Validación | **Zod** | Doble uso: schemas en el main (IPC handlers) y en el renderer (formularios) |
+| Forms | **react-hook-form + zod** | `zodResolver` para integrar validación sin boilerplate |
+| Date library | **date-fns** | Liviano, tree-shakeable, sin dependencias |
+| Tests E2E | Skip en MVP | Pruebas manuales suficientes para el alcance actual |
