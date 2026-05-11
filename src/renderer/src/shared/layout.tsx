@@ -99,8 +99,8 @@ export function AppLayout() {
           <header className="border-b border-slate-800 bg-slate-950/80 px-6 py-4 backdrop-blur">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm text-slate-400">Fases 1, 2 y 3 en evolución</p>
-                <h2 className="text-xl font-semibold">Operación offline con catálogo y clientes</h2>
+                <p className="text-sm text-slate-400">Fases 1, 2, 3 y 4 en evolución</p>
+                <h2 className="text-xl font-semibold">Operación offline con ventas, catálogo y clientes</h2>
               </div>
               <div className="rounded-full border border-slate-800 px-4 py-2 text-sm text-slate-300">
                 Main process + SQLite + IPC por dominio

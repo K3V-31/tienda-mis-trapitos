@@ -270,7 +270,7 @@ export function CustomersPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-xl font-semibold text-white">Historial del cliente</h3>
-                <p className="mt-1 text-sm text-slate-400">La fase de ventas todavía no está implementada, pero la estructura ya queda lista para enchufarla sin reescribir nada.</p>
+                <p className="mt-1 text-sm text-slate-400">Las ventas nuevas alimentan esta ficha automáticamente, así que acá ves contexto comercial real y no recuerdos sueltos.</p>
               </div>
               {selectedCustomer ? <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-300">{selectedCustomer.name}</div> : null}
             </div>

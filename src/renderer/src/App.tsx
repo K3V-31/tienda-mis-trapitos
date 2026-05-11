@@ -5,6 +5,7 @@ import { PlaceholderPage } from '@/pages/PlaceholderPage'
 import { CatalogPage } from '@/pages/catalog/CatalogPage'
 import { SuppliersPage } from '@/pages/catalog/SuppliersPage'
 import { CustomersPage } from '@/pages/customers/CustomersPage'
+import { PosPage } from '@/pages/pos/PosPage'
 import { useAuth } from '@/shared/auth-context'
 import { AppLayout } from '@/shared/layout'
 import { ProtectedRoute } from '@/shared/protected-route'
@@ -44,7 +45,7 @@ export default function App() {
           </Route>
 
           <Route element={<RoleRoute allowedRoles={['admin', 'vendor']} />}>
-            <Route path="/pos" element={<PlaceholderPage title="POS del vendedor" description="La navegación del vendedor ya entra al área correcta. El checkout atómico va en la fase de ventas, no antes." bullets={["Búsqueda de productos", "Carrito con validación de stock", "Ticket post-venta"]} />} />
+            <Route path="/pos" element={<PosPage />} />
             <Route path="/customers" element={<CustomersPage />} />
           </Route>
 

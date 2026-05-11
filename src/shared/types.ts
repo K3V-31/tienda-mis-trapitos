@@ -172,3 +172,55 @@ export type CustomerSaleSummary = {
   itemCount: number
   createdAt: string
 }
+
+export type PosProduct = {
+  id: number
+  name: string
+  categoryName: string
+  size: string | null
+  color: string | null
+  priceInCents: number
+  stock: number
+}
+
+export type PosProductFilters = {
+  search?: string
+}
+
+export type CheckoutItemInput = {
+  productId: number
+  quantity: number
+}
+
+export type CheckoutInput = {
+  customerId?: number | null
+  paymentMethod: PaymentMethod
+  items: CheckoutItemInput[]
+}
+
+export type SaleTicketItem = {
+  productId: number
+  productName: string
+  quantity: number
+  unitPriceInCents: number
+  discountPercent: number
+  subtotalInCents: number
+}
+
+export type SaleTicket = {
+  saleId: number
+  createdAt: string
+  paymentMethod: PaymentMethod
+  totalInCents: number
+  seller: {
+    id: number
+    name: string
+  }
+  customer: {
+    id: number
+    name: string
+    phone: string | null
+    email: string | null
+  } | null
+  items: SaleTicketItem[]
+}

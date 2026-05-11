@@ -25,4 +25,8 @@ export const IPC = {
     update: 'customers:update',
     history: 'customers:history',
   },
+  sales: {
+    searchProducts: 'sales:products:search',
+    checkout: 'sales:checkout',
+  },
 } as const
