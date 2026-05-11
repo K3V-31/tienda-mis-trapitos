@@ -6,6 +6,8 @@ export type OfferStatus = 'active' | 'scheduled' | 'expired'
 
 export type StockMovementReason = 'sale' | 'entry' | 'adjustment'
 
+export type ReportPeriod = 'today' | 'month' | 'custom'
+
 export type SessionUser = {
   id: number
   username: string
@@ -291,4 +293,78 @@ export type InventoryMovement = {
   referenceId: number | null
   userName: string
   createdAt: string
+}
+
+export type SalesReportFilters = {
+  period: ReportPeriod
+  startDate?: string
+  endDate?: string
+}
+
+export type SalesReportRow = {
+  saleId: number
+  createdAt: string
+  totalInCents: number
+  paymentMethod: PaymentMethod
+  sellerName: string
+  customerName: string | null
+  itemCount: number
+}
+
+export type SalesReportDayGroup = {
+  day: string
+  totalInCents: number
+  sales: SalesReportRow[]
+}
+
+export type SalesReport = {
+  label: string
+  period: ReportPeriod
+  startAt: string
+  endAt: string
+  totalSalesCount: number
+  totalInCents: number
+  totalsByPaymentMethod: Record<PaymentMethod, number>
+  groupedByDay: SalesReportDayGroup[]
+  sales: SalesReportRow[]
+}
+
+export type AuditLogUserOption = {
+  id: number
+  name: string
+  username: string
+}
+
+export type AuditLogEntry = {
+  id: number
+  createdAt: string
+  action: string
+  entity: string
+  entityId: number | null
+  payload: unknown
+  user: AuditLogUserOption
+}
+
+export type AuditLogFilters = {
+  userId?: number | null
+  action?: string | null
+  startDate?: string
+  endDate?: string
+  page?: number
+  pageSize?: number
+}
+
+export type AuditLogPage = {
+  items: AuditLogEntry[]
+  page: number
+  pageSize: number
+  total: number
+  availableActions: string[]
+  users: AuditLogUserOption[]
+}
+
+export type DatabaseTransferResult = {
+  canceled: boolean
+  filePath: string | null
+  relaunching: boolean
 }

@@ -40,4 +40,14 @@ export const IPC = {
     createEntry: 'inventory:entries:create',
     createAdjustment: 'inventory:adjustments:create',
   },
+  reports: {
+    salesSummary: 'reports:sales-summary',
+  },
+  audit: {
+    list: 'audit:list',
+  },
+  system: {
+    exportDatabase: 'system:database:export',
+    importDatabase: 'system:database:import',
+  },
 } as const

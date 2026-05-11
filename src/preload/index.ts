@@ -1,6 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { IPC } from '../shared/ipc-channels'
 import type {
+  AuditLogFilters,
+  AuditLogPage,
   ApiResponse,
   Category,
   ChangePasswordInput,
@@ -24,7 +26,10 @@ import type {
   PosProduct,
   Product,
   ProductFilters,
+  DatabaseTransferResult,
   SaleTicket,
+  SalesReport,
+  SalesReportFilters,
   SessionUser,
   SetProductActiveInput,
   SetSupplierActiveInput,
@@ -94,6 +99,17 @@ const api = {
       ipcRenderer.invoke(IPC.inventory.createEntry, input) as Promise<ApiResponse<{ processedCount: number }>>,
     createAdjustment: (input: CreateStockAdjustmentInput) =>
       ipcRenderer.invoke(IPC.inventory.createAdjustment, input) as Promise<ApiResponse<{ productId: number; stock: number }>>,
+  },
+  reports: {
+    getSalesSummary: (input: SalesReportFilters) =>
+      ipcRenderer.invoke(IPC.reports.salesSummary, input) as Promise<ApiResponse<SalesReport>>,
+  },
+  audit: {
+    list: (filters: AuditLogFilters) => ipcRenderer.invoke(IPC.audit.list, filters) as Promise<ApiResponse<AuditLogPage>>,
+  },
+  system: {
+    exportDatabase: () => ipcRenderer.invoke(IPC.system.exportDatabase) as Promise<ApiResponse<DatabaseTransferResult>>,
+    importDatabase: () => ipcRenderer.invoke(IPC.system.importDatabase) as Promise<ApiResponse<DatabaseTransferResult>>,
   },
 }
 

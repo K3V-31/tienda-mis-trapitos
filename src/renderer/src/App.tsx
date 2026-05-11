@@ -8,6 +8,8 @@ import { CustomersPage } from '@/pages/customers/CustomersPage'
 import { InventoryPage } from '@/pages/inventory/InventoryPage'
 import { OffersPage } from '@/pages/offers/OffersPage'
 import { PosPage } from '@/pages/pos/PosPage'
+import { ReportsPage } from '@/pages/reports/ReportsPage'
+import { AuditPage } from '@/pages/audit/AuditPage'
 import { useAuth } from '@/shared/auth-context'
 import { AppLayout } from '@/shared/layout'
 import { ProtectedRoute } from '@/shared/protected-route'
@@ -28,7 +30,7 @@ function HomeRedirect() {
     return <Navigate to="/products" replace />
   }
 
-  return <Navigate to="/dashboard" replace />
+  return <Navigate to="/reports" replace />
 }
 
 export default function App() {
@@ -40,10 +42,10 @@ export default function App() {
         <Route path="/change-password" element={<ChangePasswordPage />} />
         <Route element={<AppLayout />}>
           <Route element={<RoleRoute allowedRoles={['admin']} />}>
-            <Route path="/dashboard" element={<PlaceholderPage title="Dashboard administrativo" description="Entrada principal del administrador. Desde acá arranca la configuración del sistema y la supervisión de la operación." bullets={["Gestión de usuarios (próxima subfase)", "Resumen de ventas e inventario", "Acceso a auditoría y backup"]} />} />
+            <Route path="/dashboard" element={<Navigate to="/reports" replace />} />
             <Route path="/users" element={<PlaceholderPage title="Gestión de usuarios" description="El shell ya respeta roles y navegación. La pantalla queda lista para implementar ABM de usuarios en la siguiente iteración." bullets={["Crear usuarios admin, vendor y stock", "Resetear contraseñas", "Desactivar usuarios sin romper el último admin"]} />} />
-            <Route path="/reports" element={<PlaceholderPage title="Reportes" description="Vista reservada para reportes básicos del admin. No mezclamos alcance: primero acceso y shell, después features." bullets={["Ventas del día", "Ventas del mes", "Totales por método de pago"]} />} />
-            <Route path="/audit" element={<PlaceholderPage title="Auditoría" description="Canal reservado para trazabilidad administrativa. La arquitectura ya deja el lugar correcto para meter el módulo cuando toque." bullets={["Listado de eventos críticos", "Filtros por usuario y fecha", "Payload resumido sin secretos"]} />} />
+            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/audit" element={<AuditPage />} />
           </Route>
 
           <Route element={<RoleRoute allowedRoles={['admin', 'vendor']} />}>

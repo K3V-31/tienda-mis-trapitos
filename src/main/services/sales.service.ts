@@ -1,8 +1,9 @@
 import { and, asc, eq, inArray, like, or } from 'drizzle-orm'
 import type { CheckoutInput, PosProduct, SaleTicket } from '../../shared/types'
 import { getDb } from '../db/client'
-import { auditLog, categories, customers, products, saleItems, sales, stockMovements } from '../db/schema'
+import { categories, customers, products, saleItems, sales, stockMovements } from '../db/schema'
 import { requireAuth, requireRole } from '../session'
+import { writeAuditLog } from './audit.service'
 import { getActiveOfferMap } from './offers.service'
 
 function requireSalesAccess() {
@@ -168,12 +169,11 @@ export const salesService = {
         })
       }
 
-      await tx.insert(auditLog).values({
-        userId: user.id,
+      await writeAuditLog({
         action: 'checkout',
         entity: 'sale',
         entityId: sale.id,
-        payload: JSON.stringify({
+        payload: {
           customerId: customer?.id ?? null,
           paymentMethod: sale.paymentMethod,
           totalInCents,
@@ -183,8 +183,9 @@ export const salesService = {
             unitPriceInCents: item.product.price,
             discountPercent: item.discountPercent,
           })),
-        }),
-      })
+        },
+        userId: user.id,
+      }, tx)
 
       return {
         saleId: sale.id,
