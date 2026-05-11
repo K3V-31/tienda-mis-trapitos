@@ -11,6 +11,10 @@ type NavItem = {
 const navByRole: Record<UserRole, NavItem[]> = {
   admin: [
     { to: '/dashboard', label: 'Dashboard', description: 'Resumen operativo del local' },
+    { to: '/products', label: 'Productos', description: 'Catálogo y stock visible' },
+    { to: '/suppliers', label: 'Proveedores', description: 'Relación con abastecimiento' },
+    { to: '/inventory', label: 'Inventario', description: 'Entradas y ajustes' },
+    { to: '/offers', label: 'Ofertas', description: 'Promociones por producto' },
     { to: '/users', label: 'Usuarios', description: 'Alta, edición y desactivación' },
     { to: '/reports', label: 'Reportes', description: 'Ventas del día y del mes' },
     { to: '/audit', label: 'Auditoría', description: 'Trazabilidad de acciones' },
@@ -94,11 +98,11 @@ export function AppLayout() {
           <header className="border-b border-slate-800 bg-slate-950/80 px-6 py-4 backdrop-blur">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-sm text-slate-400">Fase 1 implementada</p>
-                <h2 className="text-xl font-semibold">Shell con navegación por rol</h2>
+                <p className="text-sm text-slate-400">Fases 1 y 2 en evolución</p>
+                <h2 className="text-xl font-semibold">Operación offline con catálogo tipado</h2>
               </div>
               <div className="rounded-full border border-slate-800 px-4 py-2 text-sm text-slate-300">
-                Base local + sesión en main process
+                Main process + SQLite + IPC por dominio
               </div>
             </div>
           </header>

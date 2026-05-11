@@ -30,3 +30,104 @@ export type ChangePasswordInput = {
   currentPassword: string
   newPassword: string
 }
+
+export type Category = {
+  id: number
+  name: string
+  productsCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type Supplier = {
+  id: number
+  name: string
+  phone: string | null
+  email: string | null
+  active: boolean
+  productsCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type Product = {
+  id: number
+  name: string
+  description: string | null
+  categoryId: number
+  categoryName: string
+  supplierId: number | null
+  supplierName: string | null
+  size: string | null
+  color: string | null
+  priceInCents: number
+  stock: number
+  active: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export type ProductFilters = {
+  search?: string
+  categoryId?: number | null
+  supplierId?: number | null
+  active?: 'all' | 'active' | 'inactive'
+}
+
+export type CreateCategoryInput = {
+  name: string
+}
+
+export type UpdateCategoryInput = {
+  id: number
+  name: string
+}
+
+export type DeleteCategoryInput = {
+  id: number
+}
+
+export type CreateSupplierInput = {
+  name: string
+  phone?: string | null
+  email?: string | null
+}
+
+export type UpdateSupplierInput = {
+  id: number
+  name: string
+  phone?: string | null
+  email?: string | null
+}
+
+export type SetSupplierActiveInput = {
+  id: number
+  active: boolean
+}
+
+export type CreateProductInput = {
+  name: string
+  description?: string | null
+  categoryId: number
+  supplierId?: number | null
+  size?: string | null
+  color?: string | null
+  priceInCents: number
+  initialStock: number
+}
+
+export type UpdateProductInput = {
+  id: number
+  name: string
+  description?: string | null
+  categoryId: number
+  supplierId?: number | null
+  size?: string | null
+  color?: string | null
+  priceInCents: number
+}
+
+export type SetProductActiveInput = {
+  id: number
+  active: boolean
+}

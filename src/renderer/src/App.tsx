@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage } from '@/pages/login/LoginPage'
 import { ChangePasswordPage } from '@/pages/login/ChangePasswordPage'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
+import { CatalogPage } from '@/pages/catalog/CatalogPage'
+import { SuppliersPage } from '@/pages/catalog/SuppliersPage'
 import { useAuth } from '@/shared/auth-context'
 import { AppLayout } from '@/shared/layout'
 import { ProtectedRoute } from '@/shared/protected-route'
@@ -45,9 +47,9 @@ export default function App() {
             <Route path="/customers" element={<PlaceholderPage title="Clientes" description="El módulo de clientes se habilita para vendedor, pero su implementación real se aborda en la fase correspondiente." bullets={["ABM mínimo de clientes", "Búsqueda por nombre o teléfono", "Historial de compras"]} />} />
           </Route>
 
-          <Route element={<RoleRoute allowedRoles={['stock']} />}>
-            <Route path="/products" element={<PlaceholderPage title="Catálogo y productos" description="El almacenista ya ve su shell de trabajo. Acá entra la siguiente fase completa de catálogo." bullets={["ABM de productos", "ABM de categorías", "Búsqueda y listado"]} />} />
-            <Route path="/suppliers" element={<PlaceholderPage title="Proveedores" description="Pantalla lista para recibir ABM de proveedores en la fase de catálogo." bullets={["Alta y edición", "Relación con productos", "Soft delete cuando corresponda"]} />} />
+          <Route element={<RoleRoute allowedRoles={['admin', 'stock']} />}>
+            <Route path="/products" element={<CatalogPage />} />
+            <Route path="/suppliers" element={<SuppliersPage />} />
             <Route path="/inventory" element={<PlaceholderPage title="Inventario" description="La sección existe en el shell pero la lógica de movimientos va en una fase posterior." bullets={["Entradas de mercancía", "Ajustes manuales", "Indicadores de stock bajo"]} />} />
             <Route path="/offers" element={<PlaceholderPage title="Ofertas" description="Sección preparada para promociones por producto. La base del flujo por roles ya quedó resuelta." bullets={["Vigencia start/end", "Descuento automático en POS", "Warnings por solapamiento"]} />} />
           </Route>

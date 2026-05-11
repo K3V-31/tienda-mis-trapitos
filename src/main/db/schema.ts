@@ -13,4 +13,68 @@ export const users = sqliteTable('users', {
   updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
 })
 
+export const categories = sqliteTable('categories', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull().unique(),
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+})
+
+export const suppliers = sqliteTable('suppliers', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  phone: text('phone'),
+  email: text('email'),
+  active: integer('active', { mode: 'boolean' }).notNull().default(true),
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+})
+
+export const products = sqliteTable('products', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  description: text('description'),
+  categoryId: integer('category_id')
+    .notNull()
+    .references(() => categories.id),
+  supplierId: integer('supplier_id').references(() => suppliers.id),
+  size: text('size'),
+  color: text('color'),
+  price: integer('price').notNull(),
+  stock: integer('stock').notNull().default(0),
+  active: integer('active', { mode: 'boolean' }).notNull().default(true),
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+})
+
+export const stockMovements = sqliteTable('stock_movements', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  productId: integer('product_id')
+    .notNull()
+    .references(() => products.id),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  delta: integer('delta').notNull(),
+  reason: text('reason', { enum: ['sale', 'entry', 'adjustment'] }).notNull(),
+  referenceId: integer('reference_id'),
+  note: text('note'),
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+})
+
+export const auditLog = sqliteTable('audit_log', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  action: text('action').notNull(),
+  entity: text('entity').notNull(),
+  entityId: integer('entity_id'),
+  payload: text('payload').notNull(),
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+})
+
 export type UserRow = typeof users.$inferSelect
+export type CategoryRow = typeof categories.$inferSelect
+export type SupplierRow = typeof suppliers.$inferSelect
+export type ProductRow = typeof products.$inferSelect
