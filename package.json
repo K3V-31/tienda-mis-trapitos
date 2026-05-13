@@ -1,15 +1,17 @@
 {
   "name": "tienda-trapitos",
   "version": "1.0.0",
-  "description": "",
+  "description": "POS de escritorio 100% offline para Mis Trapitos",
   "license": "ISC",
-  "author": "",
+  "author": "Zacarias Perez",
   "type": "commonjs",
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "start": "electron-vite preview",
+    "pack": "npm run build && electron-builder --dir",
+    "dist:win": "npm run build && electron-builder --win nsis",
     "postinstall": "npm run rebuild:native",
     "rebuild:native": "electron-rebuild -f -w better-sqlite3"
   },
@@ -24,6 +26,7 @@
     "@vitejs/plugin-react": "^5.2.0",
     "drizzle-kit": "^0.31.10",
     "electron": "^37.10.3",
+    "electron-builder": "^26.0.12",
     "electron-vite": "^5.0.0",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3",
@@ -42,5 +45,41 @@
     "react-router-dom": "^7.15.0",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
+  },
+  "build": {
+    "appId": "com.mistrapitos.pos",
+    "productName": "Mis Trapitos POS",
+    "asar": true,
+    "asarUnpack": [
+      "**/*.node"
+    ],
+    "compression": "normal",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Mis Trapitos POS",
+      "deleteAppDataOnUninstall": false
+    }
   }
 }
