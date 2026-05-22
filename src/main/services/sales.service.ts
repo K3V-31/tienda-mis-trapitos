@@ -131,6 +131,10 @@ export const salesService = {
 
       const totalInCents = lineItems.reduce((accumulator, item) => accumulator + item.subtotalInCents, 0)
 
+      // Generamos el createdAt en JS para no depender del default de SQLite,
+      // que no siempre se refleja en el .returning() de Drizzle con better-sqlite3
+      const createdAt = new Date().toISOString().replace('T', ' ').substring(0, 19)
+
       const createdSale = await tx
         .insert(sales)
         .values({
@@ -138,6 +142,7 @@ export const salesService = {
           userId: user.id,
           paymentMethod: input.paymentMethod,
           total: totalInCents,
+          createdAt,
         })
         .returning()
 

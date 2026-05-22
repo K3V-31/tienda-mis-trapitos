@@ -13,10 +13,12 @@ type AuditEntry = {
 }
 
 export async function writeAuditLog(entry: AuditEntry, executor: AuditExecutor = getDb()) {
-  const user = requireAuth()
+  // Si el caller ya provee userId (como hace salesService.checkout), lo usamos directamente
+  // sin requerir que la sesión esté activa en este contexto.
+  const userId = entry.userId ?? requireAuth().id
 
   await executor.insert(auditLog).values({
-    userId: entry.userId ?? user.id,
+    userId,
     action: entry.action,
     entity: entry.entity,
     entityId: entry.entityId ?? null,
