@@ -78,7 +78,8 @@ export const salesService = {
       throw new Error('empty_sale')
     }
 
-    return db.transaction(async (tx) => {
+    // Ejecutar la transacción y capturar los datos necesarios para el ticket y el audit log
+    const { sale, lineItems, customer, totalInCents } = await db.transaction(async (tx) => {
       const customer = typeof input.customerId === 'number'
         ? await tx.query.customers.findFirst({
             where: eq(customers.id, input.customerId),
@@ -169,50 +170,55 @@ export const salesService = {
         })
       }
 
-      await writeAuditLog({
-        action: 'checkout',
-        entity: 'sale',
-        entityId: sale.id,
-        payload: {
-          customerId: customer?.id ?? null,
-          paymentMethod: sale.paymentMethod,
-          totalInCents,
-          items: lineItems.map((item) => ({
-            productId: item.product.id,
-            quantity: item.quantity,
-            unitPriceInCents: item.product.price,
-            discountPercent: item.discountPercent,
-          })),
-        },
-        userId: user.id,
-      }, tx)
+      // Retornar los datos necesarios sin hacer el audit log dentro de la transacción
+      return { sale, lineItems, customer, totalInCents }
+    })
 
-      return {
-        saleId: sale.id,
-        createdAt: sale.createdAt,
+    // Audit log FUERA de la transacción, usando getDb() por defecto (sin pasar tx)
+    await writeAuditLog({
+      action: 'checkout',
+      entity: 'sale',
+      entityId: sale.id,
+      payload: {
+        customerId: customer?.id ?? null,
         paymentMethod: sale.paymentMethod,
         totalInCents,
-        seller: {
-          id: user.id,
-          name: user.name,
-        },
-        customer: customer
-          ? {
-              id: customer.id,
-              name: customer.name,
-              phone: customer.phone,
-              email: customer.email,
-            }
-          : null,
         items: lineItems.map((item) => ({
           productId: item.product.id,
-          productName: toProductLabel(item.product),
           quantity: item.quantity,
           unitPriceInCents: item.product.price,
           discountPercent: item.discountPercent,
-          subtotalInCents: item.subtotalInCents,
         })),
-      }
+      },
+      userId: user.id,
     })
+
+    // Retornar el ticket completo
+    return {
+      saleId: sale.id,
+      createdAt: sale.createdAt,
+      paymentMethod: sale.paymentMethod,
+      totalInCents,
+      seller: {
+        id: user.id,
+        name: user.name,
+      },
+      customer: customer
+        ? {
+            id: customer.id,
+            name: customer.name,
+            phone: customer.phone,
+            email: customer.email,
+          }
+        : null,
+      items: lineItems.map((item) => ({
+        productId: item.product.id,
+        productName: toProductLabel(item.product),
+        quantity: item.quantity,
+        unitPriceInCents: item.product.price,
+        discountPercent: item.discountPercent,
+        subtotalInCents: item.subtotalInCents,
+      })),
+    }
   },
 }
