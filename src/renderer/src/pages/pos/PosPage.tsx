@@ -167,6 +167,8 @@ export function PosPage() {
     setTicket(null)
     setFeedback(null)
     setError(null)
+    void loadProducts('')
+    void loadCustomers('')
   }
 
   const addToCart = (product: PosProduct) => {
@@ -271,8 +273,6 @@ export function PosPage() {
     setCustomerSearch('')
     setPaymentMethod('cash')
     setFeedback('Venta confirmada. Stock y ticket registrados correctamente.')
-    await loadProducts(productSearch)
-    await loadCustomers('')
   }
 
   if (ticket) {
