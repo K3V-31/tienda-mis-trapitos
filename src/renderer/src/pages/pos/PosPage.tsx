@@ -277,8 +277,8 @@ export function PosPage() {
 
   if (ticket) {
     return (
-      <div className="space-y-6">
-        <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+      <div id="ticket-print" className="space-y-6">
+        <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 no-print">
           <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">POS</p>
           <h2 className="mt-2 text-3xl font-semibold text-white">Ticket post-venta</h2>
           <p className="mt-2 max-w-3xl text-sm text-slate-400">

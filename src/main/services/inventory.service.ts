@@ -77,47 +77,52 @@ export const inventoryService = {
 
       const productsById = new Map(loadedProducts.map((product) => [product.id, product]))
 
-      for (const item of items) {
-        const product = productsById.get(item.productId)
+    if (loadedProducts.length !== items.length) {
+      throw new Error('product_not_found')
+    }
 
-        if (!product) {
-          throw new Error('product_not_found')
-        }
+    const productsById = new Map(loadedProducts.map((product) => [product.id, product]))
 
-        await tx.insert(stockMovements).values({
-          productId: product.id,
-          userId: user.id,
-          delta: item.quantity,
-          reason: 'entry',
-          note,
-        })
+    // Insertar movimientos y actualizar stock
+    for (const item of items) {
+      const product = productsById.get(item.productId)
 
-        await tx
-          .update(products)
-          .set({ stock: product.stock + item.quantity })
-          .where(eq(products.id, product.id))
+      if (!product) {
+        throw new Error('product_not_found')
       }
 
-      return loadedProducts
-    }).then(async (loadedProducts) => {
-      await writeAuditLog({
-        action: 'create',
-        entity: 'inventory_entry',
-        payload: {
-          note,
-          items: loadedProducts.map((product) => {
-            const entry = items.find((item) => item.productId === product.id)
-            return {
-              productId: product.id,
-              productName: product.name,
-              quantity: entry?.quantity ?? 0,
-            }
-          }),
-        },
+      await db.insert(stockMovements).values({
+        productId: product.id,
+        userId: user.id,
+        delta: item.quantity,
+        reason: 'entry',
+        note,
       })
 
-      return { processedCount: items.length }
+      await db
+        .update(products)
+        .set({ stock: product.stock + item.quantity })
+        .where(eq(products.id, product.id))
+    }
+
+    await writeAuditLog({
+      action: 'create',
+      entity: 'inventory_entry',
+      payload: {
+        note,
+        items: loadedProducts.map((product) => {
+          const entry = items.find((item) => item.productId === product.id)
+          return {
+            productId: product.id,
+            productName: product.name,
+            quantity: entry?.quantity ?? 0,
+          }
+        }),
+      },
+      userId: user.id,
     })
+
+    return { processedCount: items.length }
   },
 
   async createAdjustment(input: CreateStockAdjustmentInput) {
@@ -133,46 +138,43 @@ export const inventoryService = {
       throw new Error('invalid_adjustment_note')
     }
 
-    return db.transaction(async (tx) => {
-      const product = await tx.query.products.findFirst({
-        where: eq(products.id, input.productId),
-      })
-
-      if (!product) {
-        throw new Error('product_not_found')
-      }
-
-      const nextStock = product.stock + input.delta
-      if (nextStock < 0) {
-        throw new Error('negative_stock')
-      }
-
-      await tx.insert(stockMovements).values({
-        productId: product.id,
-        userId: user.id,
-        delta: input.delta,
-        reason: 'adjustment',
-        note,
-      })
-
-      await tx.update(products).set({ stock: nextStock }).where(eq(products.id, product.id))
-
-      return { product, nextStock }
-    }).then(async ({ product, nextStock }) => {
-      await writeAuditLog({
-        action: 'adjust',
-        entity: 'inventory',
-        entityId: product.id,
-        payload: {
-          productId: product.id,
-          productName: product.name,
-          delta: input.delta,
-          nextStock,
-          note,
-        },
-      })
-
-      return { productId: product.id, stock: nextStock }
+    const product = await db.query.products.findFirst({
+      where: eq(products.id, input.productId),
     })
+
+    if (!product) {
+      throw new Error('product_not_found')
+    }
+
+    const nextStock = product.stock + input.delta
+    if (nextStock < 0) {
+      throw new Error('negative_stock')
+    }
+
+    await db.insert(stockMovements).values({
+      productId: product.id,
+      userId: user.id,
+      delta: input.delta,
+      reason: 'adjustment',
+      note,
+    })
+
+    await db.update(products).set({ stock: nextStock }).where(eq(products.id, product.id))
+
+    await writeAuditLog({
+      action: 'adjust',
+      entity: 'inventory',
+      entityId: product.id,
+      payload: {
+        productId: product.id,
+        productName: product.name,
+        delta: input.delta,
+        nextStock,
+        note,
+      },
+      userId: user.id,
+    })
+
+    return { productId: product.id, stock: nextStock }
   },
 }

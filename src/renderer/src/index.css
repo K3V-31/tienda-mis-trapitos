@@ -82,3 +82,53 @@
     min-height: 100vh;
   }
 }
+
+/* ── Estilos de impresión del ticket ── */
+@media print {
+  @page {
+    margin: 16px;
+    size: auto;
+  }
+
+  /* Ocultar todo */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Mostrar solo el ticket y su contenido */
+  #ticket-print,
+  #ticket-print * {
+    visibility: visible;
+  }
+
+  /* Posicionar el ticket arriba */
+  #ticket-print {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    color: black;
+    padding: 24px;
+    font-family: monospace;
+    font-size: 13px;
+  }
+
+  /* Quitar fondos oscuros */
+  #ticket-print * {
+    background: white !important;
+    color: black !important;
+    border-color: #ccc !important;
+  }
+
+  /* Ocultar botones */
+  #ticket-print button {
+    display: none !important;
+  }
+
+  /* Ocultar el encabezado POS dentro del ticket */
+  #ticket-print .no-print {
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
