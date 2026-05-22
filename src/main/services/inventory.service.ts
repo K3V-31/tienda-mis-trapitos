@@ -66,16 +66,10 @@ export const inventoryService = {
 
     const note = input.note?.trim() || null
 
-    return db.transaction(async (tx) => {
-      const loadedProducts = await tx.query.products.findMany({
-        where: inArray(products.id, items.map((item) => item.productId)),
-      })
-
-      if (loadedProducts.length !== items.length) {
-        throw new Error('product_not_found')
-      }
-
-      const productsById = new Map(loadedProducts.map((product) => [product.id, product]))
+    // Cargar productos
+    const loadedProducts = await db.query.products.findMany({
+      where: inArray(products.id, items.map((item) => item.productId)),
+    })
 
     if (loadedProducts.length !== items.length) {
       throw new Error('product_not_found')
