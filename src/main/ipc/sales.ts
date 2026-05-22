@@ -49,6 +49,7 @@ export function registerSalesHandlers() {
       const ticket = await salesService.checkout(input)
       return { ok: true, data: ticket }
     } catch (error) {
+      console.error('❌ CHECKOUT ERROR:', error)
       return { ok: false, error: normalizeError(error) }
     }
   })

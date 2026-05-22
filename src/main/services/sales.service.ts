@@ -78,108 +78,103 @@ export const salesService = {
       throw new Error('empty_sale')
     }
 
-    // Ejecutar la transacción y capturar los datos necesarios para el ticket y el audit log
-    const { sale, lineItems, customer, totalInCents } = await db.transaction(async (tx) => {
-      const customer = typeof input.customerId === 'number'
-        ? await tx.query.customers.findFirst({
-            where: eq(customers.id, input.customerId),
-          })
-        : null
+    // 1. Buscar cliente (opcional)
+    const customer = typeof input.customerId === 'number'
+      ? await db.query.customers.findFirst({ where: eq(customers.id, input.customerId) })
+      : null
 
-      if (typeof input.customerId === 'number' && !customer) {
-        throw new Error('customer_not_found')
-      }
+    if (typeof input.customerId === 'number' && !customer) {
+      throw new Error('customer_not_found')
+    }
 
-      const requestedProductIds = items.map((item) => item.productId)
-      const dbProducts = await tx.query.products.findMany({
-        where: inArray(products.id, requestedProductIds),
-      })
+    // 2. Cargar productos y ofertas activas
+    const requestedProductIds = items.map((item) => item.productId)
+    const dbProducts = await db.query.products.findMany({
+      where: inArray(products.id, requestedProductIds),
+    })
 
-      const activeOffers = await getActiveOfferMap(requestedProductIds, tx)
+    if (dbProducts.length !== requestedProductIds.length) {
+      throw new Error('product_not_found')
+    }
 
-      if (dbProducts.length !== requestedProductIds.length) {
+    const activeOffers = await getActiveOfferMap(requestedProductIds)
+    const productById = new Map(dbProducts.map((product) => [product.id, product]))
+
+    // 3. Validar stock y calcular líneas
+    const lineItems = items.map((item) => {
+      const product = productById.get(item.productId)
+
+      if (!product) {
         throw new Error('product_not_found')
       }
 
-      const productById = new Map(dbProducts.map((product) => [product.id, product]))
-
-      const lineItems = items.map((item) => {
-        const product = productById.get(item.productId)
-
-        if (!product) {
-          throw new Error('product_not_found')
-        }
-
-        if (!product.active) {
-          throw new Error('product_inactive')
-        }
-
-        if (product.stock < item.quantity) {
-          throw new Error('insufficient_stock')
-        }
-
-        const discountPercent = activeOffers.get(product.id)?.discountPercent ?? 0
-        const subtotalInCents = Math.round(item.quantity * product.price * (100 - discountPercent) / 100)
-
-        return {
-          product,
-          quantity: item.quantity,
-          discountPercent,
-          subtotalInCents,
-        }
-      })
-
-      const totalInCents = lineItems.reduce((accumulator, item) => accumulator + item.subtotalInCents, 0)
-
-      // Generamos el createdAt en JS para no depender del default de SQLite,
-      // que no siempre se refleja en el .returning() de Drizzle con better-sqlite3
-      const createdAt = new Date().toISOString().replace('T', ' ').substring(0, 19)
-
-      const createdSale = await tx
-        .insert(sales)
-        .values({
-          customerId: customer?.id ?? null,
-          userId: user.id,
-          paymentMethod: input.paymentMethod,
-          total: totalInCents,
-          createdAt,
-        })
-        .returning()
-
-      const sale = createdSale[0]
-
-      await tx.insert(saleItems).values(
-        lineItems.map((item) => ({
-          saleId: sale.id,
-          productId: item.product.id,
-          quantity: item.quantity,
-          unitPrice: item.product.price,
-          discountPercent: item.discountPercent,
-          subtotal: item.subtotalInCents,
-        })),
-      )
-
-      for (const item of lineItems) {
-        await tx
-          .update(products)
-          .set({ stock: item.product.stock - item.quantity })
-          .where(eq(products.id, item.product.id))
-
-        await tx.insert(stockMovements).values({
-          productId: item.product.id,
-          userId: user.id,
-          delta: -item.quantity,
-          reason: 'sale',
-          referenceId: sale.id,
-          note: `Venta #${sale.id}`,
-        })
+      if (!product.active) {
+        throw new Error('product_inactive')
       }
 
-      // Retornar los datos necesarios sin hacer el audit log dentro de la transacción
-      return { sale, lineItems, customer, totalInCents }
+      if (product.stock < item.quantity) {
+        throw new Error('insufficient_stock')
+      }
+
+      const discountPercent = activeOffers.get(product.id)?.discountPercent ?? 0
+      const subtotalInCents = Math.round(item.quantity * product.price * (100 - discountPercent) / 100)
+
+      return {
+        product,
+        quantity: item.quantity,
+        discountPercent,
+        subtotalInCents,
+      }
     })
 
-    // Audit log FUERA de la transacción, usando getDb() por defecto (sin pasar tx)
+    const totalInCents = lineItems.reduce((accumulator, item) => accumulator + item.subtotalInCents, 0)
+
+    // 4. Insertar la venta — createdAt explícito para que .returning() lo devuelva correctamente
+    const createdAt = new Date().toISOString().replace('T', ' ').substring(0, 19)
+
+    const createdSale = await db
+      .insert(sales)
+      .values({
+        customerId: customer?.id ?? null,
+        userId: user.id,
+        paymentMethod: input.paymentMethod,
+        total: totalInCents,
+        createdAt,
+      })
+      .returning()
+
+    const sale = createdSale[0]
+
+    // 5. Insertar items de la venta
+    await db.insert(saleItems).values(
+      lineItems.map((item) => ({
+        saleId: sale.id,
+        productId: item.product.id,
+        quantity: item.quantity,
+        unitPrice: item.product.price,
+        discountPercent: item.discountPercent,
+        subtotal: item.subtotalInCents,
+      })),
+    )
+
+    // 6. Actualizar stock y registrar movimientos
+    for (const item of lineItems) {
+      await db
+        .update(products)
+        .set({ stock: item.product.stock - item.quantity })
+        .where(eq(products.id, item.product.id))
+
+      await db.insert(stockMovements).values({
+        productId: item.product.id,
+        userId: user.id,
+        delta: -item.quantity,
+        reason: 'sale',
+        referenceId: sale.id,
+        note: `Venta #${sale.id}`,
+      })
+    }
+
+    // 7. Audit log
     await writeAuditLog({
       action: 'checkout',
       entity: 'sale',
@@ -198,7 +193,7 @@ export const salesService = {
       userId: user.id,
     })
 
-    // Retornar el ticket completo
+    // 8. Retornar ticket
     return {
       saleId: sale.id,
       createdAt: sale.createdAt,
