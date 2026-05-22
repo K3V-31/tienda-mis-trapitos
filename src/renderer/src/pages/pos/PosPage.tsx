@@ -22,15 +22,15 @@ const defaultQuickCustomerForm: QuickCustomerForm = {
 }
 
 function formatCurrency(valueInCents: number) {
-  return new Intl.NumberFormat('es-AR', {
+  return new Intl.NumberFormat('es-MX', {
     style: 'currency',
-    currency: 'ARS',
+    currency: 'MXN',
     maximumFractionDigits: 2,
   }).format(valueInCents / 100)
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('es-AR', {
+  return new Intl.DateTimeFormat('es-MX', {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(new Date(value))
@@ -279,7 +279,7 @@ export function PosPage() {
     return (
       <div className="space-y-6">
         <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
-          <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">Fase 4</p>
+          <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">POS</p>
           <h2 className="mt-2 text-3xl font-semibold text-white">Ticket post-venta</h2>
           <p className="mt-2 max-w-3xl text-sm text-slate-400">
             La venta ya impactó stock, historial y auditoría. Acá ves el comprobante exacto, no una interpretación creativa.
@@ -346,7 +346,7 @@ export function PosPage() {
   return (
     <div className="space-y-6">
       <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
-        <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">Fase 4</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">POS</p>
         <h2 className="mt-2 text-3xl font-semibold text-white">POS y ventas</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
           Buscar, cobrar y registrar en una sola operación consistente. Acá no alcanza con “parece que vendió”: el stock tiene que cerrar.
@@ -361,7 +361,7 @@ export function PosPage() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <h3 className="text-xl font-semibold text-white">Buscador de productos</h3>
-                <p className="mt-1 text-sm text-slate-400">Nombre o categoría. Lo que importa es encontrar rápido sin inventarse códigos mágicos.</p>
+                <p className="mt-1 text-sm text-slate-400">Filtrá por nombre o categoría para encontrar el producto.</p>
               </div>
               <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-300">
                 {products.length} producto{products.length === 1 ? '' : 's'} en resultado
@@ -475,7 +475,7 @@ export function PosPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-xl font-semibold text-white">Cliente y cobro</h3>
-                <p className="mt-1 text-sm text-slate-400">El cliente es opcional, pero si querés historial real tenés que vincularlo.</p>
+                <p className="mt-1 text-sm text-slate-400">El cliente es opcional para la venta, pero vincularlo permite registrar su historial de compras.</p>
               </div>
               <button type="button" onClick={() => setIsQuickCustomerOpen(true)} className="rounded-2xl border border-slate-700 px-4 py-2 text-sm text-slate-100 hover:bg-slate-800">
                 Nuevo cliente

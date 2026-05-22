@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { AuditLogEntry, AuditLogPage } from '../../../../shared/types'
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('es-AR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
+  return new Intl.DateTimeFormat('es-MX', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
 }
 
 function getErrorMessage(error: string) {
@@ -67,7 +67,7 @@ export function AuditPage() {
   return (
     <div className="space-y-6">
       <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
-        <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">Fase 6</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">Auditoría</p>
         <h2 className="mt-2 text-3xl font-semibold text-white">Log de auditoría</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
           Trazabilidad real: quién hizo qué, cuándo y sobre qué entidad. Si hay un incidente, esto es lo primero que mirás.

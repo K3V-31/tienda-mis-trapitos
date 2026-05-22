@@ -17,15 +17,15 @@ const defaultCustomerForm: CustomerFormState = {
 }
 
 function formatCurrency(valueInCents: number) {
-  return new Intl.NumberFormat('es-AR', {
+  return new Intl.NumberFormat('es-MX', {
     style: 'currency',
-    currency: 'ARS',
+    currency: 'MXN',
     maximumFractionDigits: 2,
   }).format(valueInCents / 100)
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('es-AR', {
+  return new Intl.DateTimeFormat('es-MX', {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(new Date(value))

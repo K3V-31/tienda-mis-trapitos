@@ -28,7 +28,7 @@ const defaultAdjustmentForm: AdjustmentFormState = {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('es-AR', {
+  return new Intl.DateTimeFormat('es-MX', {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(new Date(value))
@@ -196,7 +196,7 @@ export function InventoryPage() {
   return (
     <div className="space-y-6">
       <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
-        <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">Fase 5</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">Inventario</p>
         <h2 className="mt-2 text-3xl font-semibold text-white">Inventario y movimientos</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
           El stock no se “arregla” tocando un número. Se mueve con entradas, ventas y ajustes auditados. Si no, después nadie sabe qué pasó.
@@ -209,7 +209,7 @@ export function InventoryPage() {
         <section className="space-y-6">
           <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
             <h3 className="text-xl font-semibold text-white">Entrada de mercadería</h3>
-            <p className="mt-1 text-sm text-slate-400">Sumá stock cuando llega reposición. Cada movimiento deja huella.</p>
+            <p className="mt-1 text-sm text-slate-400">Registrá las unidades recibidas de reposición. El movimiento queda registrado en el historial.</p>
 
             <form className="mt-5 space-y-3" onSubmit={handleEntrySubmit}>
               <label className="block space-y-2 text-sm text-slate-300">
@@ -243,7 +243,7 @@ export function InventoryPage() {
           {user?.role === 'admin' ? (
             <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
               <h3 className="text-xl font-semibold text-white">Ajuste manual</h3>
-              <p className="mt-1 text-sm text-slate-400">Solo admin: para mermas, correcciones o incidentes. Acá el motivo es OBLIGATORIO.</p>
+              <p className="mt-1 text-sm text-slate-400">Solo disponible para administradores. Usalo para corregir diferencias por mermas, robos o conteos físicos. El motivo es obligatorio.</p>
 
               <form className="mt-5 space-y-3" onSubmit={handleAdjustmentSubmit}>
                 <label className="block space-y-2 text-sm text-slate-300">

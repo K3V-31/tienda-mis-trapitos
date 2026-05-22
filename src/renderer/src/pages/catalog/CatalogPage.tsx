@@ -33,9 +33,9 @@ const defaultProductForm: ProductFormState = {
 }
 
 function formatCurrency(valueInCents: number) {
-  return new Intl.NumberFormat('es-AR', {
+  return new Intl.NumberFormat('es-MX', {
     style: 'currency',
-    currency: 'ARS',
+    currency: 'MXN',
     maximumFractionDigits: 2,
   }).format(valueInCents / 100)
 }
@@ -279,10 +279,10 @@ export function CatalogPage() {
       <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">Fase 2</p>
+            <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">Catálogo</p>
             <h2 className="mt-2 text-3xl font-semibold text-white">Catálogo, categorías y stock visible</h2>
             <p className="mt-2 max-w-3xl text-sm text-slate-400">
-              Acá vive el corazón del catálogo. Primero ordenás categorías y proveedores; después cargás productos sin tocar stock manualmente en edición. Eso se diseña bien desde la base o después explota.
+              Administrá categorías, proveedores y productos. El stock inicial se define al crear el producto y los movimientos se registran desde inventario.
             </p>
           </div>
           <div className="rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3 text-sm text-slate-300">
@@ -300,7 +300,7 @@ export function CatalogPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-xl font-semibold text-white">Categorías</h3>
-                <p className="mt-1 text-sm text-slate-400">ABM simple con nombre único. Si tiene productos, NO se borra. Y está perfecto que sea así.</p>
+                <p className="mt-1 text-sm text-slate-400">Nombre único por categoría. No es posible eliminar una categoría que tenga productos asociados.</p>
               </div>
               {editingCategory ? (
                 <button type="button" onClick={resetCategoryForm} className="rounded-xl border border-slate-700 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800">

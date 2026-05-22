@@ -368,3 +368,30 @@ export type DatabaseTransferResult = {
   filePath: string | null
   relaunching: boolean
 }
+
+export type UserListItem = {
+  id: number
+  username: string
+  name: string
+  role: UserRole
+  active: boolean
+  mustChangePassword: boolean
+  createdAt: string
+}
+
+export type CreateUserInput = {
+  username: string
+  name: string
+  role: UserRole
+  password: string
+}
+
+export type SetUserActiveInput = {
+  id: number
+  active: boolean
+}
+
+export type ResetUserPasswordInput = {
+  id: number
+  newPassword: string
+}

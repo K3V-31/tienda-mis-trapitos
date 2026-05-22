@@ -3,15 +3,15 @@ import type { Category, Offer, Product, ReportPeriod, SalesReport } from '../../
 import { customReportRangeSchema } from '@/features/reports/schemas'
 
 function formatMoney(valueInCents: number) {
-  return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(valueInCents / 100)
+  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(valueInCents / 100)
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('es-AR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
+  return new Intl.DateTimeFormat('es-MX', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(value))
 }
 
 function formatDay(value: string) {
-  return new Intl.DateTimeFormat('es-AR', { dateStyle: 'full' }).format(new Date(`${value}T00:00:00`))
+  return new Intl.DateTimeFormat('es-MX', { dateStyle: 'full' }).format(new Date(`${value}T00:00:00`))
 }
 
 function getErrorMessage(error: string) {
@@ -166,10 +166,10 @@ export function ReportsPage() {
   return (
     <div className="space-y-6">
       <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
-        <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">Fase 6</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-emerald-400">Reportes</p>
         <h2 className="mt-2 text-3xl font-semibold text-white">Reportes básicos y resguardo de base</h2>
         <p className="mt-2 max-w-3xl text-sm text-slate-400">
-          Un admin serio no trabaja a ciegas: necesita ver ventas, stock, promos vigentes y además poder sacar un backup real de la operación.
+          Consultá las ventas por período, revisá el stock disponible, las ofertas activas y realizá respaldos de la base de datos.
         </p>
         {error ? <p className="mt-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">{error}</p> : null}
         {feedback ? <p className="mt-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-100">{feedback}</p> : null}

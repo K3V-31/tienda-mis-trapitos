@@ -50,4 +50,10 @@ export const IPC = {
     exportDatabase: 'system:database:export',
     importDatabase: 'system:database:import',
   },
+  users: {
+    list: 'users:list',
+    create: 'users:create',
+    setActive: 'users:set-active',
+    resetPassword: 'users:reset-password',
+  },
 } as const

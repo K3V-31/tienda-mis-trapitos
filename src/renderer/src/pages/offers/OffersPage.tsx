@@ -24,7 +24,7 @@ function toDateInput(value: string) {
 }
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat('es-AR', {
+  return new Intl.DateTimeFormat('es-MX', {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(new Date(value))
